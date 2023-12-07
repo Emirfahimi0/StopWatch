@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { View, Text, TextInput, Button, Alert } from "react-native";
+import { timeFormatter, validateInput } from "./utils/formatter";
 
 const Stopwatch: React.FC = () => {
   const [delay, setDelay] = useState<string>("");
@@ -8,18 +9,15 @@ const Stopwatch: React.FC = () => {
   const intervalRef = useRef<number | null>(null);
 
   const startStopwatch = () => {
-    if (!validateInput(delay) || !validateInput(timer)) {
-      Alert.alert("Please enter valid numbers for delay and timer.");
-      return;
-    }
+    if (delay === "" || timer === "") return Alert.alert("Cannot be empty value ");
+
+    if (!validateInput(delay) || !validateInput(timer)) return Alert.alert("Please enter valid numbers for delay and timer.");
 
     const delayValue = parseInt(delay, 10);
     const timerValue = parseInt(timer, 10);
 
-    if (delayValue <= 0 || timerValue <= 0) {
-      Alert.alert("Please enter positive numbers for delay and timer.");
-      return;
-    }
+    // The keyboardType still prevents from key in negative numbers
+    if (delayValue <= 0 || timerValue <= 0) return Alert.alert("Please enter positive numbers for delay and timer.");
 
     setTime(timerValue);
     intervalRef.current = setInterval(() => {
@@ -27,11 +25,9 @@ const Stopwatch: React.FC = () => {
     }, delayValue * 1000);
   };
 
-  const validateInput = (input: string) => /^\d+$/.test(input);
-
   return (
     <View>
-      <Text>Time: {time}</Text>
+      <Text>Time: {timeFormatter(time)}</Text>
       <TextInput placeholder="Enter delay in seconds" keyboardType="numeric" value={delay} onChangeText={(text) => setDelay(text)} />
       <TextInput placeholder="Enter timer in seconds" keyboardType="numeric" value={timer} onChangeText={(text) => setTimer(text)} />
       <Button title="Start Stopwatch" onPress={startStopwatch} />
